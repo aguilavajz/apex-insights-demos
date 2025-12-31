@@ -1,22 +1,25 @@
-# Contributing to APEX Insights Demos
+# Contributing Guide
 
-This repository hosts the live demos and code samples for the [APEX Insights Blog](https://insightsapex.hashnode.dev).
+Welcome! We appreciate your interest in contributing. This document specifies the workflow and standards for this repository.
 
-## 🛡️ Workflow
+## 🚀 Git Flow & Branching Strategy
 
-- **Protected Branch**: `main`. Direct pushes are blocked.
-- **Pull Requests**: Required for any change.
+We follow a strict **Git Flow** workflow:
 
-### How to Add a New Demo
+1. **`develop` (Default Branch)**: All active development happens here. **Create your branches from `develop`.**
+2. **`main` (Release Branch)**: Reserved for production releases at the end of a Sprint.
+3. **Feature Branches**:
+    * Format: `feature/brief-description` or `fix/issue-description`
+    * Source: `develop`
+    * Target: Pull Request to `develop`
 
-1. Create a new folder in the root with the format `YYYY-MM-DD-topic-name`.
-2. Include all necessary SQL scripts and APEX application exports (`fXXX.sql`).
-3. Add a `README.md` inside that folder complying with the blog post structure.
-4. Open a Pull Request targeting `main`.
+> **Note:** Do NOT merge directly to `main` unless it is a hotfix.
 
-## 🤝 Standards
+## 📋 Issue & Labels
 
-- **Clean Code**: Ensure SQL scripts are idempotent (can be run multiple times without error) if possible.
-- **No Credentials**: NEVER commit passwords, wallet files, or sensitive data.
+* **Templates**: Use the provided [Issue Templates](.github/ISSUE_TEMPLATE/) for Bugs, Features, and Chores.
+* **Labels**: We use a `category: name` standard (e.g., `type: bug`, `priority: critical`, `status: blocked`).
 
-Thank you!
+## 🤖 AI Guidelines
+
+If you are using GitHub Copilot or other AI tools, please refer to [copilot-instructions.md](.github/copilot-instructions.md) for project-specific context and coding standards.
