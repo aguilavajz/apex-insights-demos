@@ -17,7 +17,7 @@ It accompanies the article **"Automated Testing: utPLSQL for Backends"**.
 
 ## 🛠️ How to Run
 
-1. Connect to your database schema (via SQLcl or SQL Plus).
+1. Connect to your database schema (via SQLcl or SQL*Plus).
 2. Run the installation script:
 
     ```sql
