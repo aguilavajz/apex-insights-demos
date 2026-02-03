@@ -1,6 +1,6 @@
 # Performance Tuning in Interactive Reports
 
-This demo showcases how to optimize Oracle APEX Interactive Reports when dealing with large datasets (1 million+ rows).
+This demo showcases how to optimize Oracle APEX Interactive Reports when dealing with large datasets (100,000+ rows).
 
 ## 🚀 The Challenge
 
@@ -8,7 +8,7 @@ Interactive Reports add several layers of "Wrapper Queries" to handle dynamic fi
 
 ## 🛠️ Components
 
-1. **`setup_data.sql`**: A script to generate 1,000,000 rows of test data with realistic distributions.
+1. **`setup_data.sql`**: A script to generate 100,000 rows of test data with realistic distributions.
 2. **Demo App Features**:
    - **Naive IR**: Default settings (Total Row Count enabled).
    - **Optimized IR**: Using the "Lazy Count" pattern and optimized SQL source.
