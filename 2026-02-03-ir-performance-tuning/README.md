@@ -28,6 +28,13 @@ Interactive Reports add several layers of "Wrapper Queries" to handle dynamic fi
 3. **Naive Config:** Set Pagination to "Row Ranges X to Y **of Z**" (forces full scan).
 4. **Optimized Config:** Set Pagination to "Row Ranges X to Y" (enables Top-N optimization).
 
+## 🔐 Credentials (Public Demo)
+
+If you are following the live demo online, use these credentials:
+
+- **Username:** `DEMO`
+- **Password:** `ApexInsights2026!`
+
 ---
 **Part of the APEX Insights series.**
 [Read the full article](https://insightsapex.vinnyum.tech/performance-tuning-interactive-reports-apex)
