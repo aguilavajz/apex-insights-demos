@@ -1,0 +1,27 @@
+/* =====================================================================
+   main.css - APEX Universal Theme Premium Overrides
+   Consolidated styling via Workspace Static Files
+   ===================================================================== */
+
+/* 1. Premium Glassmorphism Card Override */
+/* Custom Template Option implementation */
+.custom-glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px); /* Requires browser support */
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    /* Leveraging native UT shadows if available, fallback otherwise */
+    box-shadow: var(--ut-component-box-shadow, 0 8px 32px 0 rgba(31, 38, 135, 0.37));
+}
+
+/* 2. Custom Badge using Universal Theme Variables */
+/* Fully supports Theme Roller Dark Mode flipping automatically */
+.my-custom-badge {
+    background-color: var(--ut-palette-primary);
+    color: var(--ut-component-text-color);
+    border: 1px solid var(--ut-component-border-color);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-weight: bold;
+}
