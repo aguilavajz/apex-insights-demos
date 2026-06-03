@@ -5,8 +5,9 @@ This demo accompanies the APEX Insights article:
 
 ## Overview
 
-A single-page Oracle APEX application that demonstrates the 10 dashboard design
-principles from the article using a realistic sales operations scenario.
+An Oracle APEX dashboard flow (page 6 with page 10 drilldown) that demonstrates
+the 10 dashboard design principles from the article using a realistic sales
+operations scenario.
 
 ### What the Demo Includes
 
@@ -16,10 +17,9 @@ principles from the article using a realistic sales operations scenario.
    Each KPI is color-coded via SQL using Universal Theme semantic classes
    (`u-success`, `u-warning`, `u-danger`).
 3. **Revenue Trend (Line Chart)** — Monthly won revenue for the last 12 months.
-   Region Caching is enabled with a 300-second timeout per user.
-4. **Pipeline by Stage (Bar Chart)** — Horizontal bar for open deals, sorted by
-   value descending. Click any bar to drilldown into a filtered Interactive Report.
-5. **Detail Report (Page 2)** — Filtered Interactive Report with semantic row
+4. **Pipeline by Stage (Bar Chart)** — Vertical bar for open deals, sorted by
+   label ascending. Click any bar to drilldown into a filtered Interactive Report.
+5. **Detail Report (Page 10)** — Filtered Interactive Report with semantic row
    highlighting based on stage.
 
 ## Installation
@@ -69,7 +69,7 @@ Import the application export from the `apex/` folder:
 | SQL for Visualization | Aggregated queries, no raw rows sent to charts |
 | Controlled Filters | 3 items max; each chart declares its own Page Items to Submit |
 | Drilldown Pattern | Bar chart → IR → Detail page |
-| Performance | Region Cache on trend chart; set-based SQL only |
+| Performance | Set-based SQL with targeted page item submission |
 
 ## Feedback
 
