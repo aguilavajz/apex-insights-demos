@@ -6,17 +6,6 @@
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- KPI Thresholds
--- -----------------------------------------------------------------------------
-INSERT INTO demo_kpi_thresholds (kpi_name, warn_threshold, danger_threshold, description)
-VALUES ('AT_RISK_COUNT', 5, 10, 'Number of At Risk opportunities');
-
-INSERT INTO demo_kpi_thresholds (kpi_name, warn_threshold, danger_threshold, description)
-VALUES ('OVERDUE_COUNT', 3, 8, 'Deals past close_date with open stage');
-
-COMMIT;
-
--- -----------------------------------------------------------------------------
 -- Opportunities — 240 records spread across 12 months
 -- Uses deterministic logic (no DBMS_RANDOM) for reproducible results.
 -- -----------------------------------------------------------------------------

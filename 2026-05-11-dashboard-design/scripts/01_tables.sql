@@ -38,7 +38,7 @@ CREATE TABLE demo_opportunities (
     created_at      DATE           DEFAULT SYSDATE NOT NULL
 );
 
--- Indexes for dashboard filter columns (P1_REGION, P1_OWNER, P1_PERIOD)
+-- Indexes for dashboard filter columns (P6_REGION, P6_OWNER, P6_PERIOD)
 CREATE INDEX idx_opp_region     ON demo_opportunities (region);
 CREATE INDEX idx_opp_owner      ON demo_opportunities (owner_name);
 CREATE INDEX idx_opp_close_date ON demo_opportunities (close_date);

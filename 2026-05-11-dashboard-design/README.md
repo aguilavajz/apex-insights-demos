@@ -52,7 +52,7 @@ sql username/password@connection_string @scripts/02_data.sql
 Import the application export from the `apex/` folder:
 
 1. Navigate to **Application Builder → Import**.
-2. Select the file `apex/f_dashboard_demo.sql`.
+2. Select the file `apex/f231200.sql`.
 3. Accept the defaults and click **Install Application**.
 4. Run the app and verify data appears in the KPI row.
 
