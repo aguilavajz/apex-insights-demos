@@ -41,10 +41,9 @@ create or replace package body ut_pkg_orders as
     end calculate_total_null_code;
 
     procedure calculate_total_invalid_amount is
-        l_result number;
     begin
         -- Act (Should raise exception defined in spec --%throws)
-        l_result := pkg_orders.calculate_total(-50, 'WELCOME10');
+        ut.expect(pkg_orders.calculate_total(-50, 'WELCOME10')).to_be_null();
     end calculate_total_invalid_amount;
 
 end ut_pkg_orders;
