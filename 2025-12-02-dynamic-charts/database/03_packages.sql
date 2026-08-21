@@ -3,45 +3,36 @@
 -- Name: GET_SALES_DATA
 
 DECLARE
-    l_cursor   APEX_EXEC.T_CURSOR;
-    l_period   VARCHAR2(20);
-    l_total    NUMBER;
+    l_context  APEX_EXEC.T_CONTEXT;
 BEGIN
-    -- Step 1: Execute secure SQL with bind variables
-    l_cursor := APEX_EXEC.OPEN_CURSOR(
-        p_sql_statement =>
+    -- Step 1: Execute secure SQL with bind variables using optimized Query Context
+    l_context := APEX_EXEC.OPEN_QUERY_CONTEXT(
+        p_location          => APEX_EXEC.C_LOCATION_LOCAL_DB,
+        p_sql_query         =>
             'SELECT
-               TO_CHAR(order_date, ''YYYY-MM'') AS period,
-               SUM(order_total)                 AS total_sales
+               TO_CHAR(order_date, ''YYYY-MM'') AS "period",
+               SUM(order_total)                 AS "total_sales"
              FROM orders
              WHERE EXTRACT(YEAR FROM order_date) = :P_YEAR
                AND (:P_REGION IS NULL OR region_id = :P_REGION)
              GROUP BY TO_CHAR(order_date, ''YYYY-MM'')
-             ORDER BY period',
-        p_bind_vars     => APEX_EXEC.T_BIND_VAR(
-            APEX_EXEC.T_BIND_VAR_ROW('P_YEAR',   :P10_YEAR),
-            APEX_EXEC.T_BIND_VAR_ROW('P_REGION', :P10_REGION)
+             ORDER BY "period"',
+        p_external_parameters => APEX_EXEC.T_PARAMETERS(
+            APEX_EXEC.T_PARAMETER(p_name => 'P_YEAR',   p_value => :P10_YEAR),
+            APEX_EXEC.T_PARAMETER(p_name => 'P_REGION', p_value => :P10_REGION)
         )
     );
 
-    -- Step 2: Emit JSON response
+    -- Step 2: Emit JSON response directly from context (High-Performance Serialization)
     APEX_JSON.OPEN_OBJECT;
-    APEX_JSON.OPEN_ARRAY('data');
-
-    LOOP
-        APEX_EXEC.FETCH_ROWS(l_cursor);
-        EXIT WHEN APEX_EXEC.LAST_FETCH_STATUS != 0;
-
-        l_period := APEX_EXEC.GET_VARCHAR2(l_cursor, 'PERIOD');
-        l_total  := APEX_EXEC.GET_NUMBER  (l_cursor, 'TOTAL_SALES');
-
-        APEX_JSON.OPEN_OBJECT;
-        APEX_JSON.WRITE('period',       l_period);
-        APEX_JSON.WRITE('total_sales',  l_total);
-        APEX_JSON.CLOSE_OBJECT;
-    END LOOP;
-
-    APEX_JSON.CLOSE_ARRAY;
+    APEX_JSON.WRITE('data', l_context);
     APEX_JSON.CLOSE_OBJECT;
+
+    -- Step 3: Clean up
+    APEX_EXEC.CLOSE_CONTEXT(l_context);
+EXCEPTION
+    WHEN OTHERS THEN
+        APEX_EXEC.CLOSE_CONTEXT(l_context);
+        RAISE;
 END;
 /
