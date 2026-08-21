@@ -1,6 +1,4 @@
 create or replace package pkg_orders as
-    -- Constant for standard discount
-    c_standard_discount constant number := 0.10; -- 10%
 
     /**
      * Calculates the total amount after applying a discount code.
@@ -24,15 +22,26 @@ create or replace package body pkg_orders as
         p_amount        in number,
         p_discount_code in varchar2 default null
     ) return number is
-        l_total number := p_amount;
+        l_total           number := p_amount;
+        l_discount_factor number;
     begin
         if p_amount < 0 then
             raise_application_error(-20001, 'Order amount cannot be negative');
         end if;
 
-        if p_discount_code = 'WELCOME10' then
-            l_total := l_total - (l_total * c_standard_discount);
-        end if;
+        -- Look up the discount factor from the database to avoid hardcoding
+        begin
+            select discount_factor
+              into l_discount_factor
+              from discounts
+             where discount_code = p_discount_code;
+
+            l_total := l_total - (l_total * l_discount_factor);
+        exception
+            when no_data_found then
+                -- No valid discount code found, proceed with original amount
+                null;
+        end;
 
         return l_total;
     end calculate_total;

@@ -2,6 +2,9 @@
 set define off verify off feedback off
 whenever sqlerror exit sql.sqlcode failure
 
+prompt Installing Schema (discounts table)...
+@../src/schema_discounts.sql
+
 prompt Installing Business Logic (pkg_orders)...
 @../src/pkg_orders.sql
 
