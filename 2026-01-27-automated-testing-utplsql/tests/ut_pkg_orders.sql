@@ -13,6 +13,9 @@ create or replace package ut_pkg_orders as
     --%throws(-20001)
     procedure calculate_total_invalid_amount;
 
+    --%test(Calculate Total - Unrecognized Discount Code)
+    procedure calculate_total_invalid_code;
+
 end ut_pkg_orders;
 /
 
@@ -46,6 +49,17 @@ create or replace package body ut_pkg_orders as
         -- Act (Should raise exception defined in spec --%throws)
         l_result := pkg_orders.calculate_total(-50, 'WELCOME10');
     end calculate_total_invalid_amount;
+
+    procedure calculate_total_invalid_code is
+        l_actual   number;
+        l_expected number := 100; -- No discount for invalid code
+    begin
+        -- Act
+        l_actual := pkg_orders.calculate_total(100, 'INVALID');
+
+        -- Assert
+        ut.expect(l_actual).to_equal(l_expected);
+    end calculate_total_invalid_code;
 
 end ut_pkg_orders;
 /
