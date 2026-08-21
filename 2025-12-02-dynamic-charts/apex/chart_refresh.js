@@ -28,7 +28,7 @@ apex.server.process(
       apex.message.showErrors([
         {
           type: "error",
-          message: "Request failed: " + errorThrown,
+          message: "An error occurred while processing your request. Please try again later.",
           location: ["page"]
         }
       ]);
