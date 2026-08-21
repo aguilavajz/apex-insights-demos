@@ -18,10 +18,6 @@ apex.server.process(
       }));
       
       console.log("Mapped Data:", mapped);
-      
-      // Example: Update a chart region if it supports setData
-      // const chartRegion = apex.region("SALES_CHART");
-      // chartRegion.setData(mapped);
     },
     error: function(jqXHR, textStatus, errorThrown) {
       apex.message.clearErrors();
