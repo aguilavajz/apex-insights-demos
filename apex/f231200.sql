@@ -2895,8 +2895,8 @@ wwv_flow_imp_page.create_page_plug(
 ,p_plug_display_sequence=>10
 ,p_location=>null
 ,p_plug_header=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'Username: DEMO<br>',
-'Password: ApexInsights2026!'))
+'Username: [Refer to Documentation]<br>',
+'Password: [Refer to Documentation]'))
 ,p_region_image=>'#APP_FILES#icons/app-icon-512.png'
 ,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
   'expand_shortcuts', 'N',
