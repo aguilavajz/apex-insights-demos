@@ -9,19 +9,13 @@ apex.server.process(
   },
   {
     success: function(pData) {
-      console.log("Response:", pData);
-
       // Map the data if necessary, or use directly
       const mapped = pData.data.map(r => ({
         period: r.period,
         total:  r.total_sales
       }));
-      
-      console.log("Mapped Data:", mapped);
-      
-      // Example: Update a chart region if it supports setData
-      // const chartRegion = apex.region("SALES_CHART");
-      // chartRegion.setData(mapped);
+
+      // Example: Update a chart region using apex.region("REGION_ID").setData(data)
     },
     error: function(jqXHR, textStatus, errorThrown) {
       apex.message.clearErrors();
