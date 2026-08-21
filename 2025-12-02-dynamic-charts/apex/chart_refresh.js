@@ -9,15 +9,11 @@ apex.server.process(
   },
   {
     success: function(pData) {
-      console.log("Response:", pData);
-
       // Map the data if necessary, or use directly
       const mapped = pData.data.map(r => ({
         period: r.period,
         total:  r.total_sales
       }));
-      
-      console.log("Mapped Data:", mapped);
       
       // Example: Update a chart region if it supports setData
       // const chartRegion = apex.region("SALES_CHART");
@@ -28,7 +24,7 @@ apex.server.process(
       apex.message.showErrors([
         {
           type: "error",
-          message: "Request failed: " + errorThrown,
+          message: "An unexpected error occurred while fetching sales data. Please try again later or contact support.",
           location: ["page"]
         }
       ]);
