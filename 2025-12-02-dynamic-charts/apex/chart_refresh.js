@@ -23,12 +23,12 @@ apex.server.process(
       // const chartRegion = apex.region("SALES_CHART");
       // chartRegion.setData(mapped);
     },
-    error: function(jqXHR, textStatus, errorThrown) {
+    error: function() {
       apex.message.clearErrors();
       apex.message.showErrors([
         {
           type: "error",
-          message: "Request failed: " + errorThrown,
+          message: "An error occurred while retrieving the data.",
           location: ["page"]
         }
       ]);
