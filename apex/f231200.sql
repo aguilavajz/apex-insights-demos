@@ -5008,7 +5008,7 @@ wwv_flow_imp_page.create_page_plug(
 ,p_plug_query_headings_type=>'COLON_DELMITED_LIST'
 ,p_plug_header=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'Username: DEMO<br>',
-'Password: ApexInsights2026!'))
+'Password: [Refer to Documentation]'))
 ,p_region_image=>'#APP_FILES#icons/app-icon-512.png'
 ,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
   'expand_shortcuts', 'N',
