@@ -9,15 +9,12 @@ apex.server.process(
   },
   {
     success: function(pData) {
-      console.log("Response:", pData);
-
       // Map the data if necessary, or use directly
+      // Avoid logging sensitive response data to client console
       const mapped = pData.data.map(r => ({
         period: r.period,
         total:  r.total_sales
       }));
-      
-      console.log("Mapped Data:", mapped);
       
       // Example: Update a chart region if it supports setData
       // const chartRegion = apex.region("SALES_CHART");
@@ -25,10 +22,11 @@ apex.server.process(
     },
     error: function(jqXHR, textStatus, errorThrown) {
       apex.message.clearErrors();
+      // Show generic error message to avoid exposing raw technical details or stack traces
       apex.message.showErrors([
         {
           type: "error",
-          message: "Request failed: " + errorThrown,
+          message: "An error occurred while loading chart data.",
           location: ["page"]
         }
       ]);
