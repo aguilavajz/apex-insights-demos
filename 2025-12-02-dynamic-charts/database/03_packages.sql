@@ -4,8 +4,13 @@
 
 DECLARE
     l_context  APEX_EXEC.T_CONTEXT;
+    l_params   APEX_EXEC.T_PARAMETERS;
 BEGIN
-    -- Step 1: Execute secure SQL with bind variables using optimized Query Context
+    -- Step 1: Configure bind parameters defensively (supports AJAX x01/x02 and session state)
+    APEX_EXEC.ADD_PARAMETER(l_params, 'P_YEAR',   COALESCE(APEX_APPLICATION.G_X01, :P10_YEAR));
+    APEX_EXEC.ADD_PARAMETER(l_params, 'P_REGION', COALESCE(APEX_APPLICATION.G_X02, :P10_REGION));
+
+    -- Step 2: Execute secure SQL with bind variables using optimized Query Context
     l_context := APEX_EXEC.OPEN_QUERY_CONTEXT(
         p_location          => APEX_EXEC.C_LOCATION_LOCAL_DB,
         p_sql_query         =>
@@ -17,22 +22,21 @@ BEGIN
                AND (:P_REGION IS NULL OR region_id = :P_REGION)
              GROUP BY TO_CHAR(order_date, ''YYYY-MM'')
              ORDER BY "period"',
-        p_external_parameters => APEX_EXEC.T_PARAMETERS(
-            APEX_EXEC.T_PARAMETER(p_name => 'P_YEAR',   p_value => :P10_YEAR),
-            APEX_EXEC.T_PARAMETER(p_name => 'P_REGION', p_value => :P10_REGION)
-        )
+        p_sql_parameters    => l_params
     );
 
-    -- Step 2: Emit JSON response directly from context (High-Performance Serialization)
+    -- Step 3: Emit JSON response directly from context (High-Performance Serialization)
     APEX_JSON.OPEN_OBJECT;
-    APEX_JSON.WRITE('data', l_context);
+    APEX_JSON.WRITE_CONTEXT('data', l_context);
     APEX_JSON.CLOSE_OBJECT;
 
-    -- Step 3: Clean up
-    APEX_EXEC.CLOSE_CONTEXT(l_context);
+    -- Step 4: Clean up resources
+    APEX_EXEC.CLOSE(l_context);
 EXCEPTION
     WHEN OTHERS THEN
-        APEX_EXEC.CLOSE_CONTEXT(l_context);
+        IF l_context IS NOT NULL THEN
+            APEX_EXEC.CLOSE(l_context);
+        END IF;
         RAISE;
 END;
 /
