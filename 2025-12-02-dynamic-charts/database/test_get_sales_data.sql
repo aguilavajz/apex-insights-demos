@@ -112,6 +112,23 @@ BEGIN
     INSERT INTO orders (customer_name, order_total, order_date, region_id)
     VALUES ('Deterministic Cust 3', 500.00, TO_DATE('2099-01-25', 'YYYY-MM-DD'), 2);
 
+    -- Insert controlled fixtures for Year 2097 sargable boundary testing (Region 3)
+    -- Lower boundary: 2096-12-31 23:59:59 (prior year - must be excluded)
+    INSERT INTO orders (customer_name, order_total, order_date, region_id)
+    VALUES ('Boundary Prior Year', 111.00, TO_DATE('2096-12-31 23:59:59', 'YYYY-MM-DD HH24:MI:SS'), 3);
+
+    -- Exact lower boundary: 2097-01-01 00:00:00 (start of year - must be included)
+    INSERT INTO orders (customer_name, order_total, order_date, region_id)
+    VALUES ('Boundary Start Year', 222.00, TO_DATE('2097-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS'), 3);
+
+    -- Exact upper boundary: 2097-12-31 23:59:59 (end of year - must be included)
+    INSERT INTO orders (customer_name, order_total, order_date, region_id)
+    VALUES ('Boundary End Year', 333.00, TO_DATE('2097-12-31 23:59:59', 'YYYY-MM-DD HH24:MI:SS'), 3);
+
+    -- Upper boundary: 2098-01-01 00:00:00 (next year - must be excluded)
+    INSERT INTO orders (customer_name, order_total, order_date, region_id)
+    VALUES ('Boundary Next Year', 444.00, TO_DATE('2098-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS'), 3);
+
     :TEST_YEAR   := '2099';
     :TEST_REGION := '1';
 
@@ -291,6 +308,51 @@ BEGIN
                         AND INSTR(l_buf, '"total_sales":') > 0
                         AND INSTR(l_buf, '"TOTAL_SALES":') = 0),
         p_detail    => 'Keys check: period and total_sales must be lowercase'
+    );
+END;
+/
+
+--------------------------------------------------------------------------------
+-- TEST 6: Sargable date range boundary precision [start, end)
+-- Evaluates Year 2097 Region 3:
+-- 2096-12-31 23:59:59 (111.00) excluded
+-- 2097-01-01 00:00:00 (222.00) included in 2097-01
+-- 2097-12-31 23:59:59 (333.00) included in 2097-12
+-- 2098-01-01 00:00:00 (444.00) excluded
+--------------------------------------------------------------------------------
+DECLARE
+    l_cgiv owa.vc_arr;
+    l_cgin owa.vc_arr;
+BEGIN
+    owa.init_cgi_env(0, l_cgin, l_cgiv);
+    APEX_APPLICATION.G_X01 := '2097';
+    APEX_APPLICATION.G_X02 := '3';
+    :P10_YEAR   := NULL;
+    :P10_REGION := NULL;
+END;
+/
+@@03_packages.sql
+DECLARE
+    l_page  HTP.HTBUF_ARR;
+    l_lines NUMBER := 9999;
+    l_buf   CLOB;
+BEGIN
+    OWA.GET_PAGE(l_page, l_lines);
+    FOR i IN 1..l_lines LOOP
+        l_buf := l_buf || l_page(i);
+    END LOOP;
+    test_sales_runner_pkg.record_result(
+        p_name      => 'Test 6: Sargable date boundary precision (inclusive start 2097-01-01 00:00:00, exclusive end 2098-01-01 00:00:00)',
+        p_condition => (l_buf IS NOT NULL
+                        AND INSTR(l_buf, '"period":"2097-01"') > 0
+                        AND INSTR(l_buf, '"total_sales":222') > 0
+                        AND INSTR(l_buf, '"period":"2097-12"') > 0
+                        AND INSTR(l_buf, '"total_sales":333') > 0
+                        AND INSTR(l_buf, '"total_sales":111') = 0
+                        AND INSTR(l_buf, '"total_sales":444') = 0
+                        AND INSTR(l_buf, '2096-12') = 0
+                        AND INSTR(l_buf, '2098-01') = 0),
+        p_detail    => SUBSTR(l_buf, 1, 200)
     );
 END;
 /

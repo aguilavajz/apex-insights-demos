@@ -18,7 +18,8 @@ BEGIN
                TO_CHAR(order_date, ''YYYY-MM'') AS "period",
                SUM(order_total)                 AS "total_sales"
              FROM orders
-             WHERE EXTRACT(YEAR FROM order_date) = :P_YEAR
+             WHERE order_date >= TO_DATE(:P_YEAR || ''-01-01'', ''YYYY-MM-DD'')
+               AND order_date <  TO_DATE(TO_NUMBER(:P_YEAR) + 1 || ''-01-01'', ''YYYY-MM-DD'')
                AND (:P_REGION IS NULL OR region_id = :P_REGION)
              GROUP BY TO_CHAR(order_date, ''YYYY-MM'')
              ORDER BY "period"',
