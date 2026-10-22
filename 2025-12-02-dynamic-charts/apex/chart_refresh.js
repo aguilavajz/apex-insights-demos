@@ -25,7 +25,7 @@ apex.server.process(
       apex.message.showErrors([
         {
           type: "error",
-          message: "Request failed: " + errorThrown,
+          message: "An unexpected error occurred while fetching sales data. Please try again later or contact support.",
           location: ["page"]
         }
       ]);
