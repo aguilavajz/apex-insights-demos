@@ -45,7 +45,7 @@ create or replace package body ut_pkg_orders as
 
     procedure calculate_total_invalid_code is
         l_actual   number;
-        l_expected number := 100; -- No discount
+        l_expected number := 100; -- No discount for invalid code
     begin
         -- Act
         l_actual := pkg_orders.calculate_total(100, 'INVALID');
