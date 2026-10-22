@@ -15,10 +15,8 @@ apex.server.process(
         period: r.period,
         total:  r.total_sales
       }));
-      
-      // Example: Update a chart region if it supports setData
-      // const chartRegion = apex.region("SALES_CHART");
-      // chartRegion.setData(mapped);
+
+      // Example: Update a chart region using apex.region("REGION_ID").setData(data)
     },
     error: function(jqXHR, textStatus, errorThrown) {
       apex.message.clearErrors();
