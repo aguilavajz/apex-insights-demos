@@ -18,12 +18,12 @@ apex.server.process(
 
       // Example: Update a chart region using apex.region("REGION_ID").setData(data)
     },
-    error: function(jqXHR, textStatus, errorThrown) {
+    error: function() {
       apex.message.clearErrors();
       apex.message.showErrors([
         {
           type: "error",
-          message: "Request failed: " + errorThrown,
+          message: "An error occurred while retrieving the data.",
           location: ["page"]
         }
       ]);
