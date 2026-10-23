@@ -16,14 +16,14 @@ apex.server.process(
         total:  r.total_sales
       }));
 
-      // Example: Update a chart region using apex.region("REGION_ID").setData(data)
+      // Use the mapped data to update the UI (e.g., apex.region("ID").setData(mapped))
     },
     error: function(jqXHR, textStatus, errorThrown) {
       apex.message.clearErrors();
       apex.message.showErrors([
         {
           type: "error",
-          message: "Request failed: " + errorThrown,
+          message: "An error occurred while retrieving sales data.",
           location: ["page"]
         }
       ]);
