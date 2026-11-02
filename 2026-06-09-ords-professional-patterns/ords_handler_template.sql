@@ -145,8 +145,8 @@ CREATE OR REPLACE PACKAGE BODY pkg_ords_handler_template AS
         l_ref_id     VARCHAR2(36);
         l_filter_val VARCHAR2(200);
     BEGIN
-        -- 1. Sanitization
-        l_filter_val := UPPER(TRIM(p_filter_val));
+        -- 1. Sanitization & input length truncation (prevent string buffer overflow ORA-06502)
+        l_filter_val := UPPER(TRIM(SUBSTR(p_filter_val, 1, 200)));
 
         -- 2. Explicit Column Projection (No SELECT *), with Row-level filtration
         OPEN p_cursor FOR
@@ -238,9 +238,9 @@ CREATE OR REPLACE PACKAGE BODY pkg_ords_handler_template AS
         l_name_clean  VARCHAR2(200);
         l_email_clean VARCHAR2(200);
     BEGIN
-        -- 1. Sanitization
-        l_name_clean  := TRIM(p_name);
-        l_email_clean := LOWER(TRIM(p_email));
+        -- 1. Sanitization & input length truncation (prevent string buffer overflow ORA-06502)
+        l_name_clean  := TRIM(SUBSTR(p_name, 1, 200));
+        l_email_clean := LOWER(TRIM(SUBSTR(p_email, 1, 200)));
 
         -- 2. Validation
         IF l_name_clean IS NULL OR l_email_clean IS NULL THEN
@@ -478,7 +478,7 @@ BEGIN
                 END IF;
 
                 pkg_ords_handler_template.get_resource(
-                    p_id     => TO_NUMBER(:id),
+                    p_id     => TO_NUMBER(:id DEFAULT NULL ON CONVERSION ERROR),
                     p_cursor => :resultset
                 );
             END;
