@@ -7,63 +7,55 @@
 
 -- -----------------------------------------------------------------------------
 -- Opportunities — 240 records spread across 12 months
--- Uses deterministic logic (no DBMS_RANDOM) for reproducible results.
+-- Optimized set-based INSERT using CONNECT BY LEVEL instead of PL/SQL loops
+-- to eliminate PL/SQL engine context switching and improve script execution speed.
+-- Uses deterministic logic for reproducible results.
 -- -----------------------------------------------------------------------------
-DECLARE
-    TYPE t_owners  IS TABLE OF VARCHAR2(100);
-    TYPE t_regions IS TABLE OF VARCHAR2(50);
-    TYPE t_stages  IS TABLE OF VARCHAR2(30);
+INSERT INTO demo_opportunities (
+    owner_name,
+    region,
+    stage,
+    amount,
+    close_date
+)
+WITH params AS (
+    SELECT
+        LEVEL AS row_num,
+        TRUNC((LEVEL - 1) / 20) AS month_offset,
+        MOD(LEVEL - 1, 20) AS day_offset
+    FROM DUAL
+    CONNECT BY LEVEL <= 240
+)
+SELECT
+    CASE MOD(row_num - 1, 5)
+        WHEN 0 THEN 'Alice Morgan'
+        WHEN 1 THEN 'Bob Chen'
+        WHEN 2 THEN 'Carol Diaz'
+        WHEN 3 THEN 'David Kim'
+        WHEN 4 THEN 'Eva Torres'
+    END AS owner_name,
+    CASE MOD(day_offset, 5)
+        WHEN 0 THEN 'NORTH'
+        WHEN 1 THEN 'SOUTH'
+        WHEN 2 THEN 'EAST'
+        WHEN 3 THEN 'WEST'
+        WHEN 4 THEN 'CENTRAL'
+    END AS region,
+    CASE MOD(row_num + month_offset, 8)
+        WHEN 0 THEN 'Won'
+        WHEN 1 THEN 'Won'
+        WHEN 2 THEN 'Won'
+        WHEN 3 THEN 'Lost'
+        WHEN 4 THEN 'At Risk'
+        WHEN 5 THEN 'Negotiation'
+        WHEN 6 THEN 'Proposal'
+        WHEN 7 THEN 'Qualification'
+    END AS stage,
+    ROUND((MOD(row_num * 7919 + day_offset * 1031, 245001) + 5000) / 100) * 100 AS amount,
+    ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -month_offset) + MOD(day_offset * 3, 28) AS close_date
+FROM params;
 
-    l_owners  t_owners  := t_owners('Alice Morgan','Bob Chen','Carol Diaz','David Kim','Eva Torres');
-    l_regions t_regions := t_regions('NORTH','SOUTH','EAST','WEST','CENTRAL');
-    l_stages  t_stages  := t_stages(
-        'Won','Won','Won',           -- 3x Won  (~37.5% closed-won)
-        'Lost',                      -- 1x Lost  (~12.5%)
-        'At Risk',                   -- 1x At Risk
-        'Negotiation',               -- 1x Negotiation
-        'Proposal',                  -- 1x Proposal
-        'Qualification'              -- 1x Qualification
-    );
-
-    l_amount     NUMBER;
-    l_close_date DATE;
-    l_months_ago NUMBER;
-    l_row        NUMBER := 0;
-BEGIN
-    FOR month_offset IN 0..11 LOOP                    -- 12 months back
-        FOR day_offset IN 0..19 LOOP                  -- 20 records per month
-            l_row := l_row + 1;
-
-            -- Spread close_date across the month (every ~1.5 days)
-            l_months_ago := month_offset;
-            l_close_date := ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -l_months_ago)
-                            + MOD(day_offset * 3, 28);  -- days 0,3,6...27
-
-            -- Vary amounts realistically: $5k–$250k
-            l_amount := ROUND(
-                (MOD(l_row * 7919 + day_offset * 1031, 245001) + 5000) / 100
-            ) * 100;
-
-            INSERT INTO demo_opportunities (
-                owner_name,
-                region,
-                stage,
-                amount,
-                close_date
-            ) VALUES (
-                l_owners(MOD(l_row - 1, 5) + 1),
-                l_regions(MOD(day_offset, 5) + 1),
-                l_stages(MOD(l_row + month_offset, 8) + 1),
-                l_amount,
-                l_close_date
-            );
-        END LOOP;
-    END LOOP;
-    COMMIT;
-
-    DBMS_OUTPUT.PUT_LINE('Inserted ' || l_row || ' opportunity records.');
-END;
-/
+COMMIT;
 
 -- Verification
 SELECT
