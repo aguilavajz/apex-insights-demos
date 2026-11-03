@@ -25,3 +25,13 @@
     padding: 0.25rem 0.5rem;
     font-weight: bold;
 }
+
+/* 3. Keyboard Accessibility Focus Visible Indicators */
+/* Provides clear visual feedback for interactive elements when focused via keyboard */
+.custom-glass-card:focus-visible,
+.my-custom-badge:focus-visible,
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--ut-palette-primary, #056ac8);
+    outline-offset: 2px;
+}
