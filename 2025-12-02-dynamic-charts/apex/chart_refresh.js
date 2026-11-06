@@ -23,7 +23,7 @@ apex.server.process(
       apex.message.showErrors([
         {
           type: "error",
-          message: "An error occurred while retrieving sales data.",
+          message: "An error occurred while communicating with the server.",
           location: ["page"]
         }
       ]);
