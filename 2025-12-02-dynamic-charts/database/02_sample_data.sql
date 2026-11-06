@@ -42,6 +42,13 @@ BEGIN
         FROM regions
     ) r ON r.rn = g.target_rn;
 
+    -- Fail-fast post-condition: assert exactly 1,000 orders were seeded
+    l_cnt := 0;
+    SELECT COUNT(*) INTO l_cnt FROM orders;
+    IF l_cnt <> 1000 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Seeding failed: expected 1000 orders, found ' || l_cnt);
+    END IF;
+
     IF p_commit THEN
         COMMIT;
     END IF;
