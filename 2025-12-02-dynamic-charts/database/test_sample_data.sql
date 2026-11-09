@@ -29,6 +29,8 @@ DECLARE
     l_bad_cust_names    NUMBER;
     l_guard_2_ok        BOOLEAN := FALSE;
     l_guard_2_code      NUMBER := 0;
+    l_guard_3_ok        BOOLEAN := FALSE;
+    l_guard_3_code      NUMBER := 0;
 
     PROCEDURE record_result(p_name VARCHAR2, p_condition BOOLEAN, p_detail VARCHAR2 DEFAULT NULL) IS
     BEGIN
@@ -184,6 +186,27 @@ BEGIN
         'Test 10: Production guard blocks immediate reseeding with ORA-20003',
         l_guard_2_ok,
         'Expected error -20003 on second call, got ' || l_guard_2_code
+    );
+
+    -- 6. Test fail-fast post-condition assertion (ORA-20004) when order count invariant is violated
+    DELETE /*+ NO_PARALLEL */ FROM orders;
+    DELETE /*+ NO_PARALLEL */ FROM regions;
+    INSERT INTO orders (customer_name, order_total, order_date, region_id)
+    VALUES ('Pre-existing Fixture Order', 100, SYSDATE, NULL);
+
+    BEGIN
+        seed_dynamic_charts_data(p_commit => FALSE);
+    EXCEPTION
+        WHEN OTHERS THEN
+            l_guard_3_code := SQLCODE;
+            IF l_guard_3_code = -20004 THEN
+                l_guard_3_ok := TRUE;
+            END IF;
+    END;
+    record_result(
+        'Test 11: Production post-condition raises ORA-20004 when order count <> 1000',
+        l_guard_3_ok,
+        'Expected error -20004 from seed_dynamic_charts_data, got ' || l_guard_3_code
     );
 
     -- Rollback transactional sandbox
