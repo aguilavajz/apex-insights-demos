@@ -9,8 +9,11 @@ create or replace package ut_pkg_orders as
     --%test(Calculate Total - Null Code / No Discount)
     procedure calculate_total_null_code;
 
-    --%test(Calculate Total - Unknown Code / No Discount)
-    procedure calculate_total_unknown_code;
+    --%test(Calculate Total - Lowercase Code / No Discount)
+    procedure calculate_total_lowercase_code;
+
+    --%test(Calculate Total - Near-Miss Code / No Discount)
+    procedure calculate_total_near_miss_code;
 
     --%test(Calculate Total - Invalid Discount Code)
     procedure calculate_total_invalid_code;
@@ -49,16 +52,25 @@ create or replace package body ut_pkg_orders as
         ut.expect(l_actual).to_equal(l_expected);
     end calculate_total_null_code;
 
-    procedure calculate_total_unknown_code is
+    procedure calculate_total_lowercase_code is
         l_actual   number;
-        l_expected number := 100; -- No discount
+        l_expected number := 100;
     begin
-        -- Act
-        l_actual := pkg_orders.calculate_total(100, 'INVALID_CODE');
+        -- Codes match the literal WELCOME10; do not normalize their case.
+        l_actual := pkg_orders.calculate_total(100, 'welcome10');
 
-        -- Assert
         ut.expect(l_actual).to_equal(l_expected);
-    end calculate_total_unknown_code;
+    end calculate_total_lowercase_code;
+
+    procedure calculate_total_near_miss_code is
+        l_actual   number;
+        l_expected number := 100;
+    begin
+        -- A valid prefix must not grant a discount to a different code.
+        l_actual := pkg_orders.calculate_total(100, 'WELCOME100');
+
+        ut.expect(l_actual).to_equal(l_expected);
+    end calculate_total_near_miss_code;
 
     procedure calculate_total_invalid_code is
         l_actual   number;
