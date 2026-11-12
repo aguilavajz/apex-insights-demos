@@ -5,7 +5,8 @@ apex.server.process(
   "GET_SALES_DATA", // Process Name (must match the AJAX Callback name)
   {
     x01: $v('P10_YEAR'),
-    x02: $v('P10_REGION')
+    x02: $v('P10_REGION'),
+    pageItems: ["P10_YEAR", "P10_REGION"]
   },
   {
     success: function(pData) {
@@ -14,10 +15,8 @@ apex.server.process(
         period: r.period,
         total:  r.total_sales
       }));
-      
-      // Example: Update a chart region if it supports setData
-      // const chartRegion = apex.region("SALES_CHART");
-      // chartRegion.setData(mapped);
+
+      // Use the mapped data to update the UI (e.g., apex.region("ID").setData(mapped))
     },
     error: function(jqXHR, textStatus, errorThrown) {
       apex.message.clearErrors();
