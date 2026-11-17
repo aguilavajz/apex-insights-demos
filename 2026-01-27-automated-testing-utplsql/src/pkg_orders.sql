@@ -2,6 +2,8 @@ create or replace package pkg_orders as
 
     /**
      * Calculates the total amount after applying a discount code.
+     * Requires the DISCOUNTS table (src/schema_discounts.sql) to be installed.
+     * Discount lookup uses an exact, case-sensitive match on discount_code.
      * 
      * @param p_amount        The original order amount. Must be non-negative.
      * @param p_discount_code The discount code (e.g., 'WELCOME10').
@@ -29,7 +31,8 @@ create or replace package body pkg_orders as
             raise_application_error(-20001, 'Order amount cannot be negative');
         end if;
 
-        -- Look up the discount factor from the database to avoid hardcoding
+        -- Look up the discount factor from the database to avoid hardcoding.
+        -- Requires the DISCOUNTS table created by src/schema_discounts.sql.
         begin
             select discount_factor
               into l_discount_factor
@@ -41,6 +44,9 @@ create or replace package body pkg_orders as
             when no_data_found then
                 -- No valid discount code found, proceed with original amount
                 null;
+            when others then
+                -- Re-raise unexpected errors (such as missing schema objects)
+                raise;
         end;
 
         return l_total;

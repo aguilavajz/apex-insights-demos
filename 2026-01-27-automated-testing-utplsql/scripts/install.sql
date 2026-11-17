@@ -14,7 +14,7 @@ prompt Installing Unit Tests (ut_pkg_orders)...
 prompt Installation verification...
 select object_name, status 
   from user_objects 
- where object_name in ('PKG_ORDERS', 'UT_PKG_ORDERS')
+ where object_name in ('DISCOUNTS', 'PKG_ORDERS', 'UT_PKG_ORDERS')
  order by object_name;
 
 prompt Done.
