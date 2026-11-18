@@ -15,6 +15,11 @@
     box-shadow: var(--ut-component-box-shadow, 0 8px 32px 0 rgba(31, 38, 135, 0.37));
 }
 
+.custom-glass-card:focus-visible {
+    outline: 2px solid var(--ut-palette-primary, #056ac8);
+    outline-offset: 2px;
+}
+
 /* 2. Custom Badge using Universal Theme Variables */
 /* Fully supports Theme Roller Dark Mode flipping automatically */
 .my-custom-badge {
@@ -24,4 +29,18 @@
     border-radius: 4px;
     padding: 0.25rem 0.5rem;
     font-weight: bold;
+}
+
+.my-custom-badge:focus-visible {
+    outline: 2px solid var(--ut-palette-primary, #056ac8);
+    outline-offset: 2px;
+}
+
+/* 3. Accessibility - Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+    .custom-glass-card {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        transition: none;
+    }
 }
