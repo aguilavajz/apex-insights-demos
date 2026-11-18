@@ -80,6 +80,16 @@ CREATE OR REPLACE PACKAGE pkg_ords_handler_template AS
     c_err_not_found  CONSTANT VARCHAR2(30) := 'ERR_NOT_FOUND';
     c_err_interno    CONSTANT VARCHAR2(30) := 'ERR_INTERNO';
 
+    -- Autonomous logging procedure to preserve error audit trails even if the
+    -- main transaction rolls back. Exposed in package specification for handler
+    -- error mapping and testability.
+    PROCEDURE log_error_autonomous (
+        p_codigo     IN VARCHAR2,
+        p_mensaje    IN VARCHAR2,
+        p_contexto   IN VARCHAR2,
+        p_referencia IN VARCHAR2
+    );
+
     -- GET /resources/
     PROCEDURE get_collection (
         p_filter_val IN  VARCHAR2,
@@ -453,6 +463,7 @@ BEGIN
             DECLARE
                 l_allowed   BOOLEAN;
                 l_client_id VARCHAR2(200);
+                l_id        NUMBER;
             BEGIN
                 l_client_id := OWA_UTIL.get_cgi_env('HTTP_X_ORDS_CLIENT_ID');
                 IF l_client_id IS NULL THEN
@@ -477,10 +488,13 @@ BEGIN
                     RETURN;
                 END IF;
 
+                -- Safely evaluate numeric ID once. Note: Extremely large numeric strings
+                -- exceeding 38 digits may trigger ORA-01426 (numeric overflow), which is
+                -- handled by ORDS default 500 error mapping if unhandled.
+                l_id := TO_NUMBER(:id DEFAULT NULL ON CONVERSION ERROR);
+
                 -- Route invalid/non-numeric identifier to HTTP 400 validation error
-                IF :id IS NULL 
-                   OR TO_NUMBER(:id DEFAULT NULL ON CONVERSION ERROR) IS NULL 
-                   OR TO_NUMBER(:id DEFAULT NULL ON CONVERSION ERROR) <= 0 THEN
+                IF :id IS NULL OR l_id IS NULL OR l_id <= 0 THEN
                     :status := 400;
                     pkg_ords_handler_template.get_resource(
                         p_id     => NULL,
@@ -490,7 +504,7 @@ BEGIN
                 END IF;
 
                 pkg_ords_handler_template.get_resource(
-                    p_id     => TO_NUMBER(:id),
+                    p_id     => l_id,
                     p_cursor => :resultset
                 );
             END;
