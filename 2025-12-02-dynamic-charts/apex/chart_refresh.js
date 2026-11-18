@@ -18,12 +18,12 @@ apex.server.process(
 
       // Use the mapped data to update the UI (e.g., apex.region("ID").setData(mapped))
     },
-    error: function(jqXHR, textStatus, errorThrown) {
+    error: function() {
       apex.message.clearErrors();
       apex.message.showErrors([
         {
           type: "error",
-          message: "An error occurred while communicating with the server.",
+          message: "An error occurred while retrieving the data.",
           location: ["page"]
         }
       ]);
