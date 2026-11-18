@@ -80,6 +80,16 @@ CREATE OR REPLACE PACKAGE pkg_ords_handler_template AS
     c_err_not_found  CONSTANT VARCHAR2(30) := 'ERR_NOT_FOUND';
     c_err_interno    CONSTANT VARCHAR2(30) := 'ERR_INTERNO';
 
+    -- Autonomous logging procedure to preserve error audit trails even if the
+    -- main transaction rolls back. Exposed in package specification for handler
+    -- error mapping and testability.
+    PROCEDURE log_error_autonomous (
+        p_codigo     IN VARCHAR2,
+        p_mensaje    IN VARCHAR2,
+        p_contexto   IN VARCHAR2,
+        p_referencia IN VARCHAR2
+    );
+
     -- GET /resources/
     PROCEDURE get_collection (
         p_filter_val IN  VARCHAR2,
@@ -125,8 +135,8 @@ CREATE OR REPLACE PACKAGE BODY pkg_ords_handler_template AS
             referencia
         ) VALUES (
             p_codigo,
-            p_mensaje,
-            p_contexto,
+            SUBSTRB(p_mensaje, 1, 4000),
+            SUBSTRB(p_contexto, 1, 500),
             p_referencia
         );
         COMMIT;
@@ -143,10 +153,10 @@ CREATE OR REPLACE PACKAGE BODY pkg_ords_handler_template AS
         p_cursor     OUT SYS_REFCURSOR
     ) IS
         l_ref_id     VARCHAR2(36);
-        l_filter_val VARCHAR2(200);
+        l_filter_val VARCHAR2(200 CHAR);
     BEGIN
-        -- 1. Sanitization
-        l_filter_val := UPPER(TRIM(p_filter_val));
+        -- 1. Sanitization & input length truncation (prevent string buffer overflow ORA-06502)
+        l_filter_val := UPPER(TRIM(SUBSTRB(p_filter_val, 1, 200)));
 
         -- 2. Explicit Column Projection (No SELECT *), with Row-level filtration
         OPEN p_cursor FOR
@@ -164,7 +174,7 @@ CREATE OR REPLACE PACKAGE BODY pkg_ords_handler_template AS
             log_error_autonomous(
                 p_codigo     => c_err_interno,
                 p_mensaje    => SQLERRM,
-                p_contexto   => 'pkg_ords_handler_template.get_collection | filter=' || p_filter_val,
+                p_contexto   => 'pkg_ords_handler_template.get_collection | filter=' || SUBSTRB(p_filter_val, 1, 400),
                 p_referencia => l_ref_id
             );
             
@@ -235,12 +245,12 @@ CREATE OR REPLACE PACKAGE BODY pkg_ords_handler_template AS
         p_result OUT VARCHAR2
     ) IS
         l_ref_id      VARCHAR2(36);
-        l_name_clean  VARCHAR2(200);
-        l_email_clean VARCHAR2(200);
+        l_name_clean  VARCHAR2(200 CHAR);
+        l_email_clean VARCHAR2(200 CHAR);
     BEGIN
-        -- 1. Sanitization
-        l_name_clean  := TRIM(p_name);
-        l_email_clean := LOWER(TRIM(p_email));
+        -- 1. Sanitization & input length truncation (prevent string buffer overflow ORA-06502)
+        l_name_clean  := TRIM(SUBSTRB(p_name, 1, 200));
+        l_email_clean := LOWER(TRIM(SUBSTRB(p_email, 1, 200)));
 
         -- 2. Validation
         IF l_name_clean IS NULL OR l_email_clean IS NULL THEN
@@ -274,7 +284,7 @@ CREATE OR REPLACE PACKAGE BODY pkg_ords_handler_template AS
             log_error_autonomous(
                 p_codigo     => c_err_interno,
                 p_mensaje    => SQLERRM,
-                p_contexto   => 'pkg_ords_handler_template.post_resource | name=' || p_name,
+                p_contexto   => 'pkg_ords_handler_template.post_resource | name=' || SUBSTRB(p_name, 1, 400),
                 p_referencia => l_ref_id
             );
             
@@ -453,6 +463,7 @@ BEGIN
             DECLARE
                 l_allowed   BOOLEAN;
                 l_client_id VARCHAR2(200);
+                l_id        NUMBER;
             BEGIN
                 l_client_id := OWA_UTIL.get_cgi_env('HTTP_X_ORDS_CLIENT_ID');
                 IF l_client_id IS NULL THEN
@@ -477,8 +488,23 @@ BEGIN
                     RETURN;
                 END IF;
 
+                -- Safely evaluate numeric ID once. Note: Extremely large numeric strings
+                -- exceeding 38 digits may trigger ORA-01426 (numeric overflow), which is
+                -- handled by ORDS default 500 error mapping if unhandled.
+                l_id := TO_NUMBER(:id DEFAULT NULL ON CONVERSION ERROR);
+
+                -- Route invalid/non-numeric identifier to HTTP 400 validation error
+                IF :id IS NULL OR l_id IS NULL OR l_id <= 0 THEN
+                    :status := 400;
+                    pkg_ords_handler_template.get_resource(
+                        p_id     => NULL,
+                        p_cursor => :resultset
+                    );
+                    RETURN;
+                END IF;
+
                 pkg_ords_handler_template.get_resource(
-                    p_id     => TO_NUMBER(:id),
+                    p_id     => l_id,
                     p_cursor => :resultset
                 );
             END;
