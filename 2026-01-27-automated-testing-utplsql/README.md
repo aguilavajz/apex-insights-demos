@@ -1,13 +1,13 @@
 # Automated Testing with utPLSQL (Demo)
 
+## Overview
 This directory contains a self-contained example of Unit Testing in PL/SQL using the [utPLSQL](https://utplsql.org/) framework.
 It accompanies the article **"Automated Testing: utPLSQL for Backends"**.
 
-## 📂 Structure
-
-* `src/`: Contains the business logic (`pkg_orders`).
-* `tests/`: Contains the test suite (`ut_pkg_orders`).
-* `scripts/`: Helper scripts to install and run.
+## Subdirectories & Boundaries
+- `scripts`: [scripts/README.md](./scripts/README.md) — SQL*Plus / SQLcl runner scripts (`install.sql`, `run_tests.sql`) that compile `pkg_orders` and `ut_pkg_orders`, query `user_objects`, and invoke `ut.run('orders')`.
+- `src`: [src/README.md](./src/README.md) — Production PL/SQL package `pkg_orders` (`c_standard_discount`, `calculate_total`).
+- `tests`: [tests/ut_pkg_orders.sql](./tests/ut_pkg_orders.sql) — Excluded test-only directory containing the `ut_pkg_orders` utPLSQL suite (`--%suitepath(orders)`).
 
 ## 🚀 Prerequisites
 
@@ -33,15 +33,22 @@ It accompanies the article **"Automated Testing: utPLSQL for Backends"**.
 
 ## 📊 Expected Output
 
-You should see a colored output indicating 3 tests passing:
+Running `@run_tests.sql` executes the 4 `--%test` procedures defined in [`tests/ut_pkg_orders.sql`](./tests/ut_pkg_orders.sql):
+- `calculate_total_valid` — `Calculate Total - Valid Discount` (`100`, `'WELCOME10'` -> `90`)
+- `calculate_total_null_code` — `Calculate Total - Null Code / No Discount` (`100`, `null` -> `100`)
+- `calculate_total_invalid_code` — `Calculate Total - Invalid Discount Code` (`100`, `'INVALID'` -> `100`)
+- `calculate_total_invalid_amount` — `Calculate Total - Negative Amount raises valid error` (`-50`, `'WELCOME10'` -> `--%throws(-20001)`)
+
+Illustrative utPLSQL output (4 tests passing, 0 failed):
 
 ```text
-Running orders_suite...
-Orders Package Tests
-  Calculate Total - Valid Discount [.002 sec] (OK)
-  Calculate Total - Null Code / No Discount [.001 sec] (OK)
-  Calculate Total - Negative Amount raises valid error [.001 sec] (OK)
+orders
+  Orders Package Tests
+    Calculate Total - Valid Discount [.002 sec]
+    Calculate Total - Null Code / No Discount [.001 sec]
+    Calculate Total - Invalid Discount Code [.001 sec]
+    Calculate Total - Negative Amount raises valid error [.001 sec]
 
-Finished in .00486 seconds
-3 tests, 0 failed, 0 errored, 0 disabled, 0 warning(s)
+Finished in .005 seconds
+4 tests, 0 failed, 0 errored, 0 disabled, 0 warning(s)
 ```
